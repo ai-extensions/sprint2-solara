@@ -1,0 +1,14 @@
+{
+	"name": "solara-app",
+
+	"build": {
+		"context": "..",
+		"dockerfile": "./Dockerfile"},
+	"settings": {
+		"python.pythonPath": "/opt/conda/envs/env_solara/bin/python"},
+	"extensions": [
+		"ms-python.python"
+	],
+	"remoteEnv": {
+		"PATH": "${containerEnv:PATH}:/opt/conda/envs/env_solara/bin"}
+}

@@ -1,0 +1,13 @@
+name: env_solara
+channels:
+  - terradue
+  - conda-forge
+dependencies:
+  - leafmap
+  - loguru
+  - shapely
+  - pip
+  - pip:
+    - geopandas
+    - solara
+    - ipysheet
