@@ -9,8 +9,6 @@ import solara
 
 from leafmap import toolbar
 
-# from .custom_annotation_toolbar import edit_draw_gui_alternative
-
 #
 # Application variables
 #
@@ -191,9 +189,7 @@ def stac_item_creation_component():
 
         with solara.Row():
             solara.InputText(
-                "* STAC Item ID (stac_item.id)",
-                value=stac_item_id,
-                continuous_update=continuous_update.value
+                "* STAC Item ID (stac_item.id)", value=stac_item_id, continuous_update=continuous_update.value
             )
         with solara.Row():
             path = f"./{stac_item_id.value}_stac_item.json"
@@ -239,11 +235,7 @@ def map_component():
     """
     with solara.Column(align="stretch"):
         Map.element(  # type: ignore
-            zoom=zoom.value,
-            on_zoom=zoom.set,
-            center=center.value,
-            on_center=center.set,
-            scroll_wheel_zoom=True
+            zoom=zoom.value, on_zoom=zoom.set, center=center.value, on_center=center.set, scroll_wheel_zoom=True
         )
 
 
