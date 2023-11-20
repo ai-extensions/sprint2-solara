@@ -18,7 +18,7 @@ from ipyfilechooser import FileChooser
 from IPython.display import display
 
 
-def edit_draw_gui2(m):
+def edit_draw_gui_alternative(m):
     """Generates a tool GUI for editing vector data attribute table.
 
     Args:

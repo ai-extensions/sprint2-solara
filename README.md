@@ -15,7 +15,7 @@ as an annotation app example.
 * Name folder (type the name or use default `sprint2-solara`)
 * The creation and set-up of the dev container will start. When it finishes, open a Terminal and run:
     ```
-    solara run app.py
+    solara run annotation_tool.py
     ```
 * you can open the Solara app by clicking the "Open in Browser" button in the pop-up window.
 
