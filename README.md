@@ -10,7 +10,7 @@ as an annotation app example.
 [Ipyleaflet](https://github.com/jupyter-widgets/ipyleaflet) currently has a bug (possibly through Ipywidgets) 
 that impacts the [Draw functionality](https://github.com/jupyter-widgets/ipyleaflet/issues/1119), hence limiting our 
 use of [Leafmap](https://github.com/opengeos/leafmap) as an annotation tool. There is an open 
-[Pull Request](https://github.com/jupyter-widgets/ipyleaflet/pull/1133) about it, but it has yet to be finalized
+[Pull Request](https://github.com/jupyter-widgets/ipyleaflet/pull/1133) about it, but it has yet to be finalized.
 
 While we can pin Ipyleaflet and Ipywidgets to previous versions and make the Solara app work inside a Notebook 
 (see [annotation_tool_example.ipynb](annotation_tool_example.ipynb)), the bug is still in effect when we launch 
@@ -18,7 +18,7 @@ the Solara components as a standalone application. This behavior has been tested
 packaging it in a `Flask` application.
 
 The proposed solution, for the time being, is to simply integrate the annotation tool inside the 
-[s2-labellingEOdata notebook](https://github.com/ai-extensions/notebooks/blob/main/scenario-2/s2-labellingEOdata.ipynb)
+[s2-labellingEOdata notebook](https://github.com/ai-extensions/notebooks/blob/main/scenario-2/s2-labellingEOdata.ipynb).
 
 ## Execution steps using Visual Studio Code and Dev Containers
 
