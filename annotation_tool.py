@@ -158,7 +158,7 @@ def create_stac_item(
                 "title": stac_title,
                 "type": "application/geo+json",
                 "file:size": file_size,
-                "roles": [],
+                "roles": ["data"],
             }
         },
     }
