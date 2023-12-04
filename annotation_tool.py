@@ -108,6 +108,7 @@ def create_label_properties(
         "label:methods": ["manual"],
         "version": "1",
         "label:overviews": label_overview,
+        "label:assets": ["labels"]
     }
     return label_properties_json
 
