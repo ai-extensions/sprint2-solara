@@ -30,4 +30,4 @@ destport=$((port + 1))
 
 echo "Using internal port $destport"
 
-jhsingle-native-proxy --destport $destport --authtype none solara run /home/worker/app.py {--}port 8889 {--}host=0.0.0.0 --port $port 
+jhsingle-native-proxy --destport $destport --authtype none solara run /home/worker/annotation_tool.py {--}port 8889 {--}host=0.0.0.0 --port $port
