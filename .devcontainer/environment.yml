@@ -6,8 +6,6 @@ dependencies:
   - python >=3.9,<3.12
   - jupyter
   - loguru
-  - ipyleaflet
-  - ipywidgets
   - leafmap
   - ipysheet
   - solara
