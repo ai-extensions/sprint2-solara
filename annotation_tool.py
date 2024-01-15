@@ -230,7 +230,9 @@ def stac_item_creation_component():
                 _This will only create a partial STAC item, containing the bounding box information._
 
                 _In order to create this file, follow this Leafmap example :
-                [Create Vector with Leafmap](https://leafmap.org/notebooks/45_create_vector/)_
+                [Create Vector with Leafmap](https://leafmap.org/notebooks/45_create_vector/)
+                For convinience, a `Save Annotations` toolbar (lower right corner) has been added to the directly to map
+                which simplifies the process to save the annotations to file._
 
                 _The bounding box information will be calculated automatically._
 

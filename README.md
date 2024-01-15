@@ -12,10 +12,9 @@ that impacts the [Draw functionality](https://github.com/jupyter-widgets/ipyleaf
 use of [Leafmap](https://github.com/opengeos/leafmap) as an annotation tool. There is an open 
 [Pull Request](https://github.com/jupyter-widgets/ipyleaflet/pull/1133) about it, but it has yet to be finalized.
 
-While we can pin Ipyleaflet and Ipywidgets to previous versions and make the Solara app work inside a Notebook 
-(see [annotation_tool_example.ipynb](annotation_tool_example.ipynb)), the bug is still in effect when we launch 
-the Solara components as a standalone application. This behavior has been tested using both Solara (`solara run`) and 
-packaging it in a `Flask` application.
+While the Solara app work inside a Notebook (see [annotation_tool_example.ipynb](annotation_tool_example.ipynb)), 
+the bug is still in effect when we launch the Solara components as a standalone application. This behavior has been 
+tested using both Solara (`solara run`) and packaging it in a `Flask` application.
 
 The proposed solution, for the time being, is to simply integrate the annotation tool inside the 
 [s2-labellingEOdata notebook](https://github.com/ai-extensions/notebooks/blob/main/scenario-2/s2-labellingEOdata.ipynb).
@@ -30,11 +29,19 @@ The proposed solution, for the time being, is to simply integrate the annotation
 * Name folder (type the name or use default `sprint2-solara`)
 * The creation and set-up of the dev container will start. When it finishes, open a Terminal and run:
     ```
-    solara run annotation_tool.py
+    solara run annotation_tool.py --host 0.0.0.0
     ```
 * you can open the Solara app by clicking the "Open in Browser" button in the pop-up window.
+* Alternatively, and because of the current known issues, the application can also be opened in a Jupyter Notebook
+    ```
+    jupyter notebook
+    
+# Then open `annotation_tool_example.ipynb` through the Jupyter interface
+    ```
 
-## Execution steps with local container
+For more on `Dev Containers` : [https://code.visualstudio.com/docs/devcontainers/containers](https://code.visualstudio.com/docs/devcontainers/containers)
+
+## Execution steps with local Docker container
 
 ### Build local container
 ```

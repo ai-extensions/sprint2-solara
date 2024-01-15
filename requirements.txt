@@ -1,8 +1,6 @@
 jhsingle-native-proxy>=0.0.9
 shapely
 fiona
-ipywidgets==8.1.1
-ipyleaflet==0.17.3
 leafmap
 geopandas
 loguru

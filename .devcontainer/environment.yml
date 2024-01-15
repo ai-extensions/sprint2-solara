@@ -3,16 +3,17 @@ channels:
   - terradue
   - conda-forge
 dependencies:
+  - python >=3.9,<3.12
+  - jupyter
   - loguru
+  - leafmap
+  - ipysheet
+  - solara
   - shapely
+  - fiona
   - pip
   - pip:
     - geopandas
-    - solara
-    - ipywidgets==8.1.1
-    - ipyleaflet==0.17.3
-    - leafmap
-    - ipysheet
 
 # Currently an issue with ipyleaflet/ipywidgets with the DrawControls, requiring fixed dependencies
 # See : https://github.com/jupyter-widgets/ipyleaflet/issues/1119
