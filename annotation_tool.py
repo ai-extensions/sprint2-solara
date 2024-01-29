@@ -41,7 +41,8 @@ stac_variables = {
 
 # Behavior variables
 continuous_update = solara.reactive(True)
-show_instruction_message = solara.reactive(True)
+show_annotation_message = solara.reactive(True)
+show_stac_item_message = solara.reactive(True)
 
 
 #
@@ -220,8 +221,8 @@ def stac_item_creation_component():
     """
 
     with solara.Card():
-        solara.Switch(label="See Instructions", value=show_instruction_message)
-        if show_instruction_message.value:
+        solara.Switch(label="See Instructions", value=show_stac_item_message)
+        if show_stac_item_message.value:
             with solara.Card("STAC Item Creation", margin=0, elevation=0):
                 solara.Markdown(
                     r"""
@@ -256,7 +257,7 @@ def stac_item_creation_component():
             )
 
             solara.InputText(
-                "The Geojson annotation file name (Validation on change only)",
+                "The filepath to Geojson annotation file (Path relative to notebook. Validation on change only)",
                 value=stac_variables[annotation_filename],
                 continuous_update=continuous_update.value,
             )
@@ -352,7 +353,8 @@ def stac_item_creation_component():
 
             solara.Markdown(
                 r"""
-                _Clicking the `CREATE` button will create a geojson file named `<stac_id>_stac_item.geojson`._
+                _Clicking the `CREATE` button will create a geojson file named `<stac_id>_stac_item.geojson` in the 
+                notebook's current directory._
                 """
             )
 
@@ -364,9 +366,28 @@ def map_component():
     Returns:
 
     """
+    solara.Switch(label="See Instructions", value=show_annotation_message)
+    if show_annotation_message.value:
+        with solara.Card("Annotation Creation", margin=0, elevation=0):
+            solara.Markdown(
+                r"""
+                _The `map` below is a customized <a href="https://leafmap.org/" target="_blank">Leafmap</a> 
+                map instance, itself using <a href="https://ipyleaflet.readthedocs.io/en/latest/" target="_blank">Ipyleaflet</a>_
+
+                _In order to create you annotations, follow this Leafmap example about vector creation : 
+                <a href="https://leafmap.org/notebooks/45_create_vector/" target="_blank">Create Vector with Leafmap</a>_
+
+                _For convenience, a `Save Annotations` toolbar (lower right corner) has been added to the 
+                directly to map which simplifies the process to save the annotations to file._
+            """
+            )
+
     with solara.Column(align="stretch"):
         Map.element(  # type: ignore
             zoom=zoom.value, on_zoom=zoom.set, center=center.value, on_center=center.set, scroll_wheel_zoom=True
         )
 
-# TODO Insert multipage
+routes = [
+    solara.Route(path="/", component=map_component, label="Annotation Tool"),
+    solara.Route(path="stac", component=stac_item_creation_component, label="STAC Item Creation"),
+]
