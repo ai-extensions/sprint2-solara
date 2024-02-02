@@ -8,6 +8,7 @@ import ipywidgets
 import leafmap
 import solara
 from leafmap import toolbar
+from shapely.geometry import box, mapping
 
 #
 # Application variables
@@ -24,6 +25,7 @@ item_label_description = "label_description"
 item_label_task_type = "item_label_task_type"
 item_source_link = "item_source_link"
 collection_id = "collection_id"
+collection_link = "collection_link"
 stac_file_name = "stac_file_name"
 item_id = "item_id"
 
@@ -35,6 +37,7 @@ stac_variables = {
     item_label_task_type: solara.reactive(""),
     item_source_link: solara.reactive(""),
     collection_id: solara.reactive(""),
+    collection_link: solara.reactive(""),
     stac_file_name: solara.reactive(""),
     item_id: solara.reactive(""),
 }
@@ -55,11 +58,15 @@ def get_annotation_bbox(filename):
     Args:
         filename: File name of the geojson annotation file
 
-    Returns: Bounding box in list form
+    Returns: Bounding box and coordinates polygon
 
     """
     annotations = fiona.open(filename)
-    return list(annotations.bounds)
+    bbox = annotations.bounds
+    geometry = box(*annotations.bounds)
+    polygon = mapping(geometry)
+    coordinates = polygon["coordinates"]
+    return bbox, coordinates
 
 
 def create_label_classes(properties):
@@ -86,9 +93,9 @@ def create_label_overviews(properties):
 
 
 def create_label_properties(
-        filename,
-        description,
-        type_of_task,
+    filename,
+    description,
+    type_of_task,
 ):
     if isinstance(type_of_task, str):
         type_of_task = [type_of_task]
@@ -100,7 +107,7 @@ def create_label_properties(
     label_overview = create_label_overviews(filtered_gdf)
 
     label_properties_json = {
-        "datatime": datetime.datetime.now().isoformat(),
+        "datetime": datetime.datetime.now().isoformat(),
         "label:type": "vector",
         "label:description": description,
         "label:properties": properties,
@@ -109,20 +116,20 @@ def create_label_properties(
         "label:methods": ["manual"],
         "version": "1",
         "label:overviews": label_overview,
-        "label:assets": ["labels"]
     }
     return label_properties_json
 
 
 def create_stac_item(
-        filename,
-        stac_id,
-        stac_title,
-        stac_asset,
-        stac_collection_id,
-        label_description,
-        label_task_type,
-        stac_item_source_link,
+    filename,
+    stac_id,
+    stac_title,
+    stac_asset,
+    stac_collection_id,
+    stac_collection_link,
+    label_description,
+    label_task_type,
+    stac_item_source_link,
 ):
     """
     Create a STAC item stub from a geojson annotation file, which
@@ -134,12 +141,13 @@ def create_stac_item(
         stac_asset: Link to the asset, which is the hosted Geojson annotation file
         stac_title: Title for the Geojson annotation file asset
         stac_collection_id: STAC collection ID, if applicable
+        stac_collection_link: STAC collection Link, if applicable
         label_description: Description of the labels
         label_task_type: Type of task for which the labels will be used
         stac_item_source_link: STAC asset link of EO data used to create annotation
 
     """
-    bbox = get_annotation_bbox(filename)
+    bbox, coordinates = get_annotation_bbox(filename)
     file_size = os.stat(filename).st_size
     label_properties = create_label_properties(
         filename=filename, description=label_description, type_of_task=label_task_type
@@ -148,15 +156,18 @@ def create_stac_item(
     if stac_asset.strip() == "":
         stac_asset = filename
 
+    if stac_item_source_link.strip() == "":
+        stac_item_source_link = None
+
     item = {
         "stac_version": "1.0.0",
         "stac_extensions": ["https://stac-extensions.github.io/label/v1.0.1/schema.json"],
         "type": "Feature",
         "id": stac_id,
         "bbox": bbox,
-        "geometry": {"type": "Polygon", "coordinates": bbox},
+        "geometry": {"type": "Polygon", "coordinates": coordinates},
         "properties": label_properties,
-        "links": [{"rel": "source", "href": stac_item_source_link}],
+        "links": [{"rel": "source", "href": stac_item_source_link, "label:assets": ["labels"]}],
         "assets": {
             "labels": {
                 "href": stac_asset,
@@ -167,8 +178,17 @@ def create_stac_item(
             }
         },
     }
-    if collection_id:
+
+    collection_variables = [stac_collection_id, stac_collection_link]
+
+    if any(variable.strip() != "" for variable in collection_variables):
+        if stac_collection_id.strip() == "":
+            stac_collection_id = "<PLEASE_UPDATE_ME>"
+        if stac_collection_link.strip() == "":
+            stac_collection_link = "<PLEASE_UPDATE_ME>"
+
         item["collection"] = stac_collection_id
+        item["links"].append({"rel": "collection", "href": stac_collection_link, "type": "application/json"})
 
     with open(f"./{stac_id}_stac_item.geojson", "w") as stac_file:
         json.dump(item, stac_file, indent=4)
@@ -214,39 +234,47 @@ class Map(leafmap.Map):
 #
 # Solara components
 #
+
+
 @solara.component
-def stac_item_creation_component():
+def stac_instructions_component():
+    with solara.Card("STAC Item Creation", margin=0, elevation=0):
+        solara.Markdown(
+            r"""
+        _This will only create a partial STAC item that can also be completed in later steps_
+
+        _The bounding box information will be calculated automatically._
+
+        _Many properties of the Label Extension are also automatically calculated, like the statistics about
+        the labels._
+
+        _Make sure that your file names match between the created geojson file using Leafmap
+        and the STAC item input file name below, and don't change the folder where the file is saved._
+
+        _For more information on the `STAC specification`, see the
+        <a href="https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md" target="_blank">STAC specification</a>._
+
+        _For more information about the `Label Extension`, see 
+        <a href="https://github.com/stac-extensions/label" target="_blank">Label Extension Specification</a>._
+
+
+        _For implementation examples of the `Label Extension`, see 
+        <a href="https://github.com/stac-extensions/label/tree/main/examples" target="_blank">Label Extension Examples</a>._
+        """
+        )
+
+
+@solara.component
+def stac_item_creation_component(show_instructions=False):
     """
     Solara component responsible for creation of STAC item based on annotation geojson file
     """
 
     with solara.Card():
-        solara.Switch(label="See Instructions", value=show_stac_item_message)
-        if show_stac_item_message.value:
-            with solara.Card("STAC Item Creation", margin=0, elevation=0):
-                solara.Markdown(
-                    r"""
-                _This will only create a partial STAC item that can also be completed in later steps_
-
-                _The bounding box information will be calculated automatically._
-
-                _Many properties of the Label Extension are also automatically calculated, like the statistics about
-                the labels._
-
-                _Make sure that your file names match between the created geojson file using Leafmap
-                and the STAC item input file name below, and don't change the folder where the file is saved._
-
-                _For more information on the `STAC specification`, see the
-                <a href="https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md" target="_blank">STAC specification</a>._
-
-                _For more information about the `Label Extension`, see 
-                <a href="https://github.com/stac-extensions/label" target="_blank">Label Extension Specification</a>._
-
-
-                _For implementation examples of the `Label Extension`, see 
-                <a href="https://github.com/stac-extensions/label/tree/main/examples" target="_blank">Label Extension Examples</a>._
-                """
-                )
+        if show_instructions:
+            solara.Switch(label="See Instructions", value=show_stac_item_message)
+            if show_stac_item_message.value:
+                stac_instructions_component()
 
         with solara.Column():
             solara.Markdown(
@@ -273,11 +301,11 @@ def stac_item_creation_component():
             )
 
             if not stac_variables[item_id].value:
-                solara.Warning(f"STAC Item ID is required")
+                solara.Warning("STAC Item ID is required")
 
             path = f"./{stac_variables[item_id].value}_stac_item.json"
             if os.path.isfile(path):
-                solara.Warning(f"STAC item file already exist with that ID")
+                solara.Warning("STAC item file already exist with that ID")
 
             solara.InputText(
                 "The title for the annotations of the STAC Item Assets (stac_item.assets.labels.title)",
@@ -286,19 +314,29 @@ def stac_item_creation_component():
             )
 
             if not stac_variables[asset_title].value:
-                solara.Warning(f"STAC Item Asset Label Title is required")
+                solara.Warning("STAC Item Asset Label Title is required")
+
+            solara.InputText(
+                "Label Description (stac_item.properties.label:description)",
+                value=stac_variables[item_label_description],
+                continuous_update=continuous_update.value,
+            )
+            if not stac_variables[item_label_description].value:
+                solara.Warning("Label description is required for valid STAC item")
+
+            solara.InputText(
+                "Link/Path to EO data source used to create labels (stac_item.links.source.href)",
+                value=stac_variables[item_source_link],
+                continuous_update=continuous_update.value,
+            )
+            if not stac_variables[item_source_link].value:
+                solara.Warning("EO data source is required for valid STAC item")
 
             solara.Markdown(
                 r"""
                 <br>
                 ## STAC Item Label Properties
                 """
-            )
-
-            solara.InputText(
-                "Label Description (stac_item.properties.label:description)",
-                value=stac_variables[item_label_description],
-                continuous_update=continuous_update.value,
             )
 
             solara.InputText(
@@ -311,27 +349,27 @@ def stac_item_creation_component():
             solara.Markdown(
                 r"""
                 <br>
-                ## STAC Item Sources, Links and Other Properties
+                ## STAC Item Other Properties
                 """
-            )
-
-            solara.InputText(
-                "The collection the STAC Item belongs to (stac_item.collection)",
-                value=stac_variables[collection_id],
-                continuous_update=continuous_update.value,
-            )
-
-            solara.InputText(
-                "EO data source used to create labels (stac_item.links.source.href)",
-                value=stac_variables[item_source_link],
-                continuous_update=continuous_update.value,
             )
 
             solara.InputText(
                 "Link to the geojson containing the annotations (stac_item.assets.labels.href)",
                 value=stac_variables[asset_link],
                 continuous_update=continuous_update.value,
-                message="If left empty, will default to Geojson annotations file name input above"
+                message="If left empty, will default to Geojson annotations file name input above",
+            )
+
+            solara.InputText(
+                "The ID of the collection the STAC Item belongs to (stac_item.collection)",
+                value=stac_variables[collection_id],
+                continuous_update=continuous_update.value,
+            )
+
+            solara.InputText(
+                "The link to collection the STAC Item belongs to (stac_item.links.rel.collection.href)",
+                value=stac_variables[collection_link],
+                continuous_update=continuous_update.value,
             )
 
             with solara.Row():
@@ -347,6 +385,7 @@ def stac_item_creation_component():
                         label_description=stac_variables[item_label_description].value,
                         label_task_type=stac_variables[item_label_task_type].value,
                         stac_item_source_link=stac_variables[item_source_link].value,
+                        stac_collection_link=stac_variables[collection_link].value,
                     ),
                     color="green",
                 )
@@ -360,32 +399,40 @@ def stac_item_creation_component():
 
 
 @solara.component
-def map_component():
+def map_instructions_component():
+    with solara.Card("Annotation Creation", margin=0, elevation=0):
+        solara.Markdown(
+            r"""
+            _The `map` below is a customized <a href="https://leafmap.org/" target="_blank">Leafmap</a> 
+            map instance, itself using <a href="https://ipyleaflet.readthedocs.io/en/latest/" target="_blank">Ipyleaflet</a>_
+
+            _In order to create you annotations, follow this Leafmap example about vector creation : 
+            <a href="https://leafmap.org/notebooks/45_create_vector/" target="_blank">Create Vector with Leafmap</a>_
+
+            _For convenience, a `Save Annotations` toolbar (lower right corner) has been added to the 
+            directly to map which simplifies the process to save the annotations to file._
+        """
+        )
+
+
+@solara.component
+def map_component(show_instructions=False):
     """
     Solara component responsible for the Map instance
     Returns:
 
     """
-    solara.Switch(label="See Instructions", value=show_annotation_message)
-    if show_annotation_message.value:
-        with solara.Card("Annotation Creation", margin=0, elevation=0):
-            solara.Markdown(
-                r"""
-                _The `map` below is a customized <a href="https://leafmap.org/" target="_blank">Leafmap</a> 
-                map instance, itself using <a href="https://ipyleaflet.readthedocs.io/en/latest/" target="_blank">Ipyleaflet</a>_
 
-                _In order to create you annotations, follow this Leafmap example about vector creation : 
-                <a href="https://leafmap.org/notebooks/45_create_vector/" target="_blank">Create Vector with Leafmap</a>_
-
-                _For convenience, a `Save Annotations` toolbar (lower right corner) has been added to the 
-                directly to map which simplifies the process to save the annotations to file._
-            """
-            )
+    if show_instructions:
+        solara.Switch(label="See Instructions", value=show_annotation_message)
+        if show_annotation_message.value:
+            map_instructions_component()
 
     with solara.Column(align="stretch"):
         Map.element(  # type: ignore
             zoom=zoom.value, on_zoom=zoom.set, center=center.value, on_center=center.set, scroll_wheel_zoom=True
         )
+
 
 routes = [
     solara.Route(path="/", component=map_component, label="Annotation Tool"),
