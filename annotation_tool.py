@@ -161,7 +161,10 @@ def create_stac_item(
 
     item = {
         "stac_version": "1.0.0",
-        "stac_extensions": ["https://stac-extensions.github.io/label/v1.0.1/schema.json"],
+        "stac_extensions": [
+            "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json",
+            "https://stac-extensions.github.io/label/v1.0.0/schema.json",
+        ],
         "type": "Feature",
         "id": stac_id,
         "bbox": bbox,
@@ -241,26 +244,19 @@ def stac_instructions_component():
     with solara.Card("STAC Item Creation", margin=0, elevation=0):
         solara.Markdown(
             r"""
-        _This will only create a partial STAC item that can also be completed in later steps_
+            __Important information about this application:__
+            
+            * This will only create a partial STAC item that can also be completed in later steps
+            * The bounding box information will be calculated automatically.
+            * Many properties of the Label Extension are also automatically calculated, like the statistics about the labels.
+            * Make sure that your file names match between the created geojson file using Leafmap and the STAC item input file name below, and don't change the folder where the file is saved.
 
-        _The bounding box information will be calculated automatically._
-
-        _Many properties of the Label Extension are also automatically calculated, like the statistics about
-        the labels._
-
-        _Make sure that your file names match between the created geojson file using Leafmap
-        and the STAC item input file name below, and don't change the folder where the file is saved._
-
-        _For more information on the `STAC specification`, see the
-        <a href="https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md" target="_blank">STAC specification</a>._
-
-        _For more information about the `Label Extension`, see 
-        <a href="https://github.com/stac-extensions/label" target="_blank">Label Extension Specification</a>._
-
-
-        _For implementation examples of the `Label Extension`, see 
-        <a href="https://github.com/stac-extensions/label/tree/main/examples" target="_blank">Label Extension Examples</a>._
-        """
+            __For more information about STAC :__
+            
+            * `STAC specification` : <a href="https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md" target="_blank">STAC specification</a>.
+            * `Label Extension` : <a href="https://github.com/stac-extensions/label" target="_blank">Label Extension Specification</a>.
+            * `Label Extension` : <a href="https://github.com/stac-extensions/label/tree/main/examples" target="_blank">Label Extension Examples</a>.
+            """
         )
 
 
@@ -403,15 +399,15 @@ def map_instructions_component():
     with solara.Card("Annotation Creation", margin=0, elevation=0):
         solara.Markdown(
             r"""
-            _The `map` below is a customized <a href="https://leafmap.org/" target="_blank">Leafmap</a> 
-            map instance, itself using <a href="https://ipyleaflet.readthedocs.io/en/latest/" target="_blank">Ipyleaflet</a>_
+            The `map` below is a customized <a href="https://leafmap.org/" target="_blank">Leafmap</a> map instance, itself 
+            using <a href="https://ipyleaflet.readthedocs.io/en/latest/" target="_blank">Ipyleaflet</a>
 
-            _In order to create you annotations, follow this Leafmap example about vector creation : 
-            <a href="https://leafmap.org/notebooks/45_create_vector/" target="_blank">Create Vector with Leafmap</a>_
+            In order to create you annotations, follow this Leafmap example about vector creation : 
+            <a href="https://leafmap.org/notebooks/45_create_vector/" target="_blank">Create Vector with Leafmap</a>
 
-            _For convenience, a `Save Annotations` toolbar (lower right corner) has been added to the 
-            directly to map which simplifies the process to save the annotations to file._
-        """
+            For convenience, a `Save Annotations` toolbar (lower right corner) has been added to the directly to map which 
+            simplifies the process to save the annotations to file.
+            """
         )
 
 
