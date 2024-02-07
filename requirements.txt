@@ -1,6 +1,7 @@
 jhsingle-native-proxy>=0.0.9
 shapely
 fiona
+pystac
 leafmap
 geopandas
 loguru
